@@ -23,3 +23,5 @@ backend/reports/
 reports/
 logs/
 *.log
+*.pid
+app.pid
