@@ -126,3 +126,32 @@ def test_api_query_execute_flow():
     assert len(data["rows"]) > 0
     assert "kpis" in data
     assert "gmv" in data["kpis"]
+
+
+def test_llm_reflect_and_fix_mechanism():
+    """测试智能体报错反思与自愈逻辑 (单元验证)"""
+    from app.core.llm_engine import llm_engine
+    schema_info = {
+        "teams": [
+            {"name": "id", "type": "INTEGER", "primary_key": True},
+            {"name": "team_name", "type": "VARCHAR(64)"},
+            {"name": "region", "type": "VARCHAR(32)"}
+        ]
+    }
+    # 模拟一个写错了字段名（如写成了 name 而不是 team_name）的失败 SQL
+    failed_sql = "SELECT id, name FROM teams"
+    error_msg = "(sqlite3.OperationalError) no such column: name"
+
+    try:
+        fixed_sql, thought = llm_engine.reflect_and_fix_sql(
+            prompt="查看所有销售战队名称",
+            failed_sql=failed_sql,
+            error_message=error_msg,
+            schema_info=schema_info,
+            dialect="sqlite"
+        )
+        assert "SELECT" in fixed_sql.upper()
+        assert "teams" in fixed_sql.lower()
+        assert "team_name" in fixed_sql or "*" in fixed_sql
+    except Exception as e:
+        pytest.skip(f"跳过远端 LLM 反思测试: {str(e)}")

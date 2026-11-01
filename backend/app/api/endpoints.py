@@ -489,36 +489,94 @@ def execute_query_flow(
 
             thought_info = f"LLM 降级智能兜底: {str(llm_err)}"
 
-    # 3. AST 只读安全沙箱校验与自动改写注入
-    try:
-        safe_sql, meta = SqlSandbox.validate_and_rewrite(
-            sql=sql_to_run,
-            dialect=req.dialect,
-            max_rows=settings.MAX_QUERY_ROWS
-        )
-        logger.info(f"AST 沙箱审查通过: {safe_sql.strip().replace(chr(10), ' ')}")
-    except SecurityValidationError as sec_err:
-        logger.warning(f"🚨 AST 沙箱拦截非法操作: prompt='{req.prompt}', sql='{sql_to_run}', error='{sec_err.message}'")
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail={
-                "code": "SECURITY_VALIDATION_ERROR",
-                "message": sec_err.message,
-                "details": sec_err.details,
-                "raw_sql": sql_to_run
-            }
-        )
+    # 3 & 4. 智能体自愈执行闭环 (Self-Healing & Reflection Loop)
+    # 最多允许反思重试 3 轮 (初始生成 1 次 + 报错反思纠错最多 2 次)
+    max_heal_rounds = 3
+    current_sql = sql_to_run
+    exec_result = None
+    safe_sql = None
+    meta = None
+    heal_history = []
+    is_self_healed = False
 
-    # 4. 目标数据库执行
-    try:
-        exec_result = db.execute_query(safe_sql)
-        logger.info(f"目标库执行成功: 返回 {exec_result['row_count']} 行, 耗时 {exec_result['duration_ms']}ms")
-    except Exception as exec_err:
-        logger.error(f"数据库执行 SQL 报错: sql='{safe_sql}', err='{str(exec_err)}'", exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"数据库执行错误: {str(exec_err)}"
-        )
+    for attempt in range(1, max_heal_rounds + 1):
+        # 3.1 沙箱只读校验
+        try:
+            safe_sql, meta = SqlSandbox.validate_and_rewrite(
+                sql=current_sql,
+                dialect=req.dialect,
+                max_rows=settings.MAX_QUERY_ROWS
+            )
+        except SecurityValidationError as sec_err:
+            # 如果是明确的恶意写操作 (如 DROP/DELETE)，坚决阻断不予自愈！
+            if any(k in sec_err.message for k in ["DROP", "DELETE", "UPDATE", "INSERT", "多语句"]):
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail={
+                        "code": "SECURITY_VALIDATION_ERROR",
+                        "message": sec_err.message,
+                        "details": sec_err.details,
+                        "raw_sql": current_sql
+                    }
+                )
+            # 否则如果是语法解析偶发问题，尝试反思
+            last_error_str = f"AST 沙箱校验未通过: {sec_err.message} ({sec_err.details})"
+            heal_history.append({"round": attempt, "sql": current_sql, "error": last_error_str})
+            if attempt < max_heal_rounds:
+                try:
+                    logger.warning(f"第 {attempt} 次沙箱拦截，启动反思纠错: {last_error_str}")
+                    current_sql, fix_thought = llm_engine.reflect_and_fix_sql(
+                        prompt=req.prompt,
+                        failed_sql=current_sql,
+                        error_message=last_error_str,
+                        schema_info=schema_data["schema"],
+                        dialect=req.dialect
+                    )
+                    is_self_healed = True
+                    thought_info = f"第 {attempt} 轮智能体自愈: {fix_thought}"
+                    continue
+                except Exception as reflect_err:
+                    logger.error(f"反思纠错调用失败: {str(reflect_err)}")
+                    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=last_error_str)
+            else:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=last_error_str)
+
+        # 3.2 目标库执行测试
+        try:
+            exec_result = db.execute_query(safe_sql)
+            logger.info(f"目标库执行成功 (第 {attempt} 轮尝试): 返回 {exec_result['row_count']} 行, 耗时 {exec_result['duration_ms']}ms")
+            break
+        except Exception as exec_err:
+            last_error_str = str(exec_err)
+            heal_history.append({"round": attempt, "sql": safe_sql, "error": last_error_str})
+            logger.warning(f"目标库执行报错 (第 {attempt} 轮): sql='{safe_sql}', err='{last_error_str}'")
+
+            if attempt < max_heal_rounds:
+                # 触发反思智能体，把真实报错栈与表结构送回 LLM 纠正！
+                try:
+                    logger.info(f"启动智能体报错反思纠错循环 (Round {attempt} -> {attempt+1})...")
+                    current_sql, fix_thought = llm_engine.reflect_and_fix_sql(
+                        prompt=req.prompt,
+                        failed_sql=safe_sql,
+                        error_message=last_error_str,
+                        schema_info=schema_data["schema"],
+                        dialect=req.dialect
+                    )
+                    is_self_healed = True
+                    thought_info = f"第 {attempt} 轮报错自愈反思: {fix_thought}"
+                    continue
+                except Exception as reflect_err:
+                    logger.error(f"反思智能体纠错失败: {str(reflect_err)}")
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"数据库执行错误且反思失败: {last_error_str}"
+                    )
+            else:
+                # 3 轮试错仍失败，抛出带详细报错的异常
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"经过智能体 {max_heal_rounds} 轮反思自愈仍未跑通，最终报错: {last_error_str}"
+                )
 
     # 5. 智能语义推断与高管指标三元组抽取
     rows = exec_result["rows"]
@@ -597,7 +655,9 @@ def execute_query_flow(
         "row_count": exec_result["row_count"],
         "kpis": kpis,
         "chart_meta": chart_meta,
-        "summary": summary_text
+        "summary": summary_text,
+        "self_healed": is_self_healed,
+        "heal_rounds": len(heal_history)
     }
 
 

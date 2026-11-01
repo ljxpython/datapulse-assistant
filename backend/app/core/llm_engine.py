@@ -102,6 +102,68 @@ class LlmEngine:
                 return sql_match.group(0).strip().rstrip(";"), "从模型回复中提取只读 SELECT"
             raise ValueError(f"大模型返回无法解析为标准 SQL: {raw_response[:200]}")
 
+    def reflect_and_fix_sql(
+        self,
+        prompt: str,
+        failed_sql: str,
+        error_message: str,
+        schema_info: Dict[str, Any],
+        dialect: str = "sqlite"
+    ) -> Tuple[str, str]:
+        """
+        报错反思智能体：根据执行失败的 SQL 与具体的数据库/沙箱报错信息，结合真实 Schema 自动反思并纠错
+        :return: (修复后的 SQL 字符串, 纠错思路)
+        """
+        schema_lines = []
+        for table, cols in schema_info.items():
+            col_strs = [f"{c['name']} ({c['type']})" for c in cols]
+            schema_lines.append(f"Table `{table}`: {', '.join(col_strs)}")
+        schema_text = "\n".join(schema_lines)
+
+        system_prompt = f"""你是一名精通数据库调优的高级诊断工程师。
+用户上一次生成的 SQL 在执行时发生了错误。
+目标数据库方言为：{dialect}
+数据库中真实存在的合法表结构 Schema：
+{schema_text}
+
+【你的任务】：
+请仔细审视上一次执行失败的 SQL 与报错原因，对照合法的 Schema 结构，找出错误根因（如不存在的字段、表名拼写错误、歧义列名、无效函数或类型不兼容），并重新生成一条保证能在目标数据库执行成功的只读 SELECT 语句！
+
+【格式要求】：
+请以纯 JSON 格式输出，不要包含 markdown 代码块包裹：
+{{
+  "thought": "对上一次错误的分析和本次纠错的修复思路（50字内）",
+  "sql": "修复后合法的纯 SELECT 查询语句"
+}}
+"""
+        user_prompt = f"""原始分析诉求：{prompt}
+失败的 SQL：
+{failed_sql}
+
+执行抛出的错误信息：
+{error_message}
+"""
+        raw_response = self._call_chat_completions(
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            temperature=0.1
+        )
+        cleaned = re.sub(r"^```(?:json)?\s*", "", raw_response.strip(), flags=re.MULTILINE)
+        cleaned = re.sub(r"```\s*$", "", cleaned.strip(), flags=re.MULTILINE).strip()
+
+        try:
+            parsed = json.loads(cleaned)
+            sql = parsed.get("sql", "").strip()
+            thought = parsed.get("thought", "模型完成反思纠错")
+            return sql, thought
+        except Exception:
+            sql_match = re.search(r"SELECT\s+[\s\S]+", raw_response, re.IGNORECASE)
+            if sql_match:
+                return sql_match.group(0).strip().rstrip(";"), "从模型反思回复中提取只读 SELECT"
+            raise ValueError(f"大模型反思返回无法解析为标准 SQL: {raw_response[:200]}")
+
     def generate_insights(self, prompt: str, safe_sql: str, kpis: dict, sample_rows: list, columns: list) -> str:
         """
         根据真实执行出来的统计数据与高管三元组，提炼精炼深刻的管理层洞察

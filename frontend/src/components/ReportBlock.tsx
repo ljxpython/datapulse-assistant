@@ -158,6 +158,17 @@ export const ReportBlock: React.FC<ReportBlockProps> = ({ block, onArchive, onDe
 
         {/* 右侧控制栏 (降噪技术操作) */}
         <div className="flex items-center gap-2 no-print self-start sm:self-auto">
+          {/* 智能体反思自愈徽标 */}
+          {block.self_healed && (
+            <span
+              className="flex items-center gap-1 text-[11px] font-semibold text-purple-700 bg-purple-50 px-2 py-1 rounded-lg border border-purple-200/60 shadow-2xs"
+              title="该查询首次执行遇阻，经智能体自动结合报错反思纠错后成功跑通！"
+            >
+              <Sparkles className="w-3 h-3 text-purple-600" />
+              <span>自动反思自愈 (第 {block.heal_rounds || 2} 轮)</span>
+            </span>
+          )}
+
           {/* SQL 审计按钮 */}
           <button
             onClick={() => setIsAuditOpen(true)}

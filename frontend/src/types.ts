@@ -42,6 +42,8 @@ export interface QueryResponse {
   kpis: Kpis;
   chart_meta?: ChartMeta;
   summary: string;
+  self_healed?: boolean;
+  heal_rounds?: number;
 }
 
 export interface ReportBlockData extends Partial<QueryResponse> {
