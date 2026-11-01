@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DataPulse Assistant —— 顶级现代前端设计方案对比体验</title>
+  <!-- 允许加载的官方 Tailwind CSS -->
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    /* 引入顶级现代排版规则 */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+    /* 极细 0.5px 边框与微光 */
+    .subtle-border {
+      border: 1px solid rgba(228, 228, 231, 0.8);
+    }
+    .dark .subtle-border {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    /* 优雅平滑过渡 */
+    * {
+      transition: background-color 0.25s ease, border-color 0.25s ease, opacity 0.25s ease;
+    }
+    /* 自定义精致滚动条 */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(150, 150, 150, 0.25);
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="bg-[#FBFBFA] text-[#18181B] min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
+
+  <!-- ============================================================== -->
+  <!-- 🎛️ 顶部极简风格试衣间 (Floating Design Mode Bar)               -->
+  <!-- ============================================================== -->
+  <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-zinc-200/80 px-6 py-3 shadow-xs">
+    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-7 h-7 rounded-lg bg-zinc-900 text-white flex items-center justify-center font-bold text-xs tracking-tight shadow-xs">
+          DP
+        </div>
+        <div>
+          <span class="text-sm font-semibold tracking-tight text-zinc-900">DataPulse UI 重构实验室</span>
+          <span class="text-xs text-zinc-600 ml-2">三大顶级设计方案盲测体验</span>
+        </div>
+      </div>
+
+      <!-- 三大设计风格切换 Tab -->
+      <div class="flex items-center bg-zinc-100 p-1 rounded-xl border border-zinc-200/80 shadow-inner">
+        <button id="btn-tab-notion" onclick="selectDesign('notion')" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all bg-white text-zinc-900 shadow-sm flex items-center gap-1.5">
+          <span>📄</span> 方案 A：Notion 研报画布流 (推荐)
+        </button>
+        <button id="btn-tab-linear" onclick="selectDesign('linear')" class="px-3.5 py-1.5 rounded-lg text-xs font-medium text-zinc-500 hover:text-zinc-900 transition-all flex items-center gap-1.5">
+          <span>⚡</span> 方案 B：Linear 瑞士极简工站
+        </button>
+        <button id="btn-tab-studio" onclick="selectDesign('studio')" class="px-3.5 py-1.5 rounded-lg text-xs font-medium text-zinc-500 hover:text-zinc-900 transition-all flex items-center gap-1.5">
+          <span>✨</span> 方案 C：Apple Pro 深空呼吸流
+        </button>
+      </div>
+
+      <div class="text-xs text-zinc-600 hidden md:block">
+        已杜绝“煤老板死黑与密密麻麻大屏” 💡
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================== -->
+  <!-- 方案 A：【Notion / Hex 交互式研报画布流 (The Clean Canvas)】    -->
+  <!-- 特点：自上而下的麦肯锡研报感、留白呼吸、居中提问岛、通透图表    -->
+  <!-- ============================================================== -->
+  <main id="design-notion" class="flex-1 max-w-4xl w-full mx-auto px-6 py-10 space-y-8">
+    
+    <!-- 1. 顶部提问胶囊岛 (Perplexity 质感提问框) -->
+    <section class="space-y-3">
+      <div class="relative bg-white rounded-2xl border border-zinc-200 shadow-sm p-2 hover:border-zinc-300 transition-all focus-within:ring-2 focus-within:ring-zinc-900/10 focus-within:border-zinc-900">
+        <div class="flex items-center gap-3 px-3 py-1.5">
+          <svg class="w-5 h-5 text-zinc-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input id="notion-input" type="text" value="分析过去半年各销售团队业绩异动、成单规模与环比增长走势" class="w-full text-sm text-zinc-900 bg-transparent placeholder-zinc-400 focus:outline-none">
+          <button onclick="simulateRunA()" class="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-medium transition-colors shrink-0 shadow-xs flex items-center gap-1.5">
+            <span>开始分析</span>
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- 快捷灵感提问标签 -->
+      <div class="flex flex-wrap items-center gap-2 text-xs text-zinc-500 px-1">
+        <span class="text-zinc-600">快捷预置场景:</span>
+        <button onclick="setQueryA(1)" class="px-2.5 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-700 transition-colors">
+          📊 半年度销售业绩与环比
+        </button>
+        <button onclick="setQueryA(2)" class="px-2.5 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-700 transition-colors">
+          📈 客单价分布与毛利率相关性
+        </button>
+        <button onclick="setQueryA(3)" class="px-2.5 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-700 transition-colors">
+          👥 高净值用户流失风险
+        </button>
+      </div>
+    </section>
+
+    <!-- 2. 研报正文卡片 (Notion 文档体质感) -->
+    <article class="bg-white rounded-2xl border border-zinc-200 shadow-xs p-8 space-y-7">
+      
+      <!-- 报告元数据头 -->
+      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-100 pb-5">
+        <div>
+          <span class="text-[11px] font-mono tracking-wider text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full uppercase font-medium">
+            ● 智能洞察报告 (Verified by Safe SQL)
+          </span>
+          <h1 id="notion-title" class="text-2xl font-bold tracking-tight text-zinc-900 mt-2">
+            2026 半年度各战队销售业绩与成单环比深度归因
+          </h1>
+          <p class="text-xs text-zinc-600 mt-1">数据源: sales_2026.sqlite · 引擎: DuckDB · 耗时 18ms</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="openSqlModal()" class="px-3 py-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-50 text-xs font-medium text-zinc-600 transition-colors flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+            <span>审查 SQL 逻辑</span>
+          </button>
+          <button onclick="alert('🎉 已生成麦肯锡标准版 PDF 研报')" class="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-medium transition-colors shadow-xs">
+            导出研报
+          </button>
+        </div>
+      </div>
+
+      <!-- 3 个核心大数字指标 (极简杂志风，绝无花里胡哨) -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 py-2">
+        <div class="border-l-2 border-zinc-900 pl-4 space-y-1">
+          <div class="text-xs text-zinc-600 font-medium">半年度总 GMV</div>
+          <div id="notion-kpi-1" class="text-2xl font-bold tracking-tight text-zinc-900 font-mono tabular-nums">
+            ¥ 3,842,500
+          </div>
+          <div class="text-xs text-emerald-800 font-medium">↑ 环比大幅增长 +14.8%</div>
+        </div>
+        <div class="border-l-2 border-zinc-300 pl-4 space-y-1">
+          <div class="text-xs text-zinc-600 font-medium">累计成交单数</div>
+          <div id="notion-kpi-2" class="text-2xl font-bold tracking-tight text-zinc-900 font-mono tabular-nums">
+            4,218 笔
+          </div>
+          <div class="text-xs text-zinc-600">客群转化率 18.2%</div>
+        </div>
+        <div class="border-l-2 border-zinc-300 pl-4 space-y-1">
+          <div class="text-xs text-zinc-600 font-medium">平均单笔价值 (AOV)</div>
+          <div id="notion-kpi-3" class="text-2xl font-bold tracking-tight text-zinc-900 font-mono tabular-nums">
+            ¥ 910.98
+          </div>
+          <div class="text-xs text-zinc-600">稳健高端化发展</div>
+        </div>
+      </div>
+
+      <!-- 高管提炼文字 (干净的 Markdown 风格) -->
+      <div class="bg-zinc-50/70 rounded-xl p-5 border border-zinc-200/60 text-sm leading-relaxed text-zinc-700 space-y-2">
+        <div class="font-semibold text-zinc-900 text-xs uppercase tracking-wider flex items-center gap-1.5">
+          <span>📌</span> 核心业务洞察与管理行动项:
+        </div>
+        <p id="notion-summary">
+          1. <strong>华东战略战队</strong> 以 <strong>¥1,420,500</strong> 领跑全盘，环比暴涨 <strong>+18.4%</strong>，战略大单交付稳定；<br>
+          2. <strong>华南大客户组</strong> 出现短暂业绩震荡（环比 <strong>-3.2%</strong>），主要受 Q2 末期供应链账期延后影响，并非需求萎缩，建议协调信审部门加快授信放行。
+        </p>
+      </div>
+
+      <!-- 杂志级通透图表 (纯白底、极淡浅灰网格、优雅平滑面积图) -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between text-xs">
+          <span class="font-semibold text-zinc-800">业绩分布与趋势对比</span>
+          <span class="text-zinc-600">单位：万元人民币</span>
+        </div>
+        <div class="rounded-xl border border-zinc-200 bg-white p-4 h-64 flex items-center justify-center relative">
+          <!-- 优雅 SVG 平滑折线面积图 (自研原生) -->
+          <svg id="notion-svg" class="w-full h-full" viewBox="0 0 650 200">
+            <!-- 渐变定义 -->
+            <defs>
+              <linearGradient id="area-indigo" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#4F46E5" stop-opacity="0.18"/>
+                <stop offset="100%" stop-color="#4F46E5" stop-opacity="0.0"/>
+              </linearGradient>
+            </defs>
+            <!-- 极淡横向网格线 -->
+            <line x1="50" y1="30" x2="620" y2="30" stroke="#F1F1F4" stroke-dasharray="2,2" />
+            <line x1="50" y1="80" x2="620" y2="80" stroke="#F1F1F4" stroke-dasharray="2,2" />
+            <line x1="50" y1="130" x2="620" y2="130" stroke="#F1F1F4" stroke-dasharray="2,2" />
+            <line x1="50" y1="170" x2="620" y2="170" stroke="#E4E4E7" />
+            
+            <!-- 面积填充与平滑折线 -->
+            <path id="notion-area-path" d="M 80 170 C 130 50, 180 80, 220 90 C 270 100, 320 120, 360 125 C 410 130, 470 150, 520 155 C 560 160, 580 165, 600 170 Z" fill="url(#area-indigo)" />
+            <path id="notion-line-path" d="M 80 50 C 130 50, 180 80, 220 90 C 270 100, 320 120, 360 125 C 410 130, 470 150, 520 155 C 560 160, 580 165, 600 165" fill="none" stroke="#4F46E5" stroke-width="2.5" stroke-linecap="round" />
+            
+            <!-- 关键数据圆点与标签 -->
+            <circle cx="80" cy="50" r="4.5" fill="#FFFFFF" stroke="#4F46E5" stroke-width="2.5" />
+            <text x="80" y="38" text-anchor="middle" font-size="11" font-weight="600" fill="#18181B">华东 142.1w</text>
+            <text x="80" y="185" text-anchor="middle" font-size="11" fill="#71717A">华东战队</text>
+
+            <circle cx="220" cy="90" r="4" fill="#FFFFFF" stroke="#4F46E5" stroke-width="2" />
+            <text x="220" y="78" text-anchor="middle" font-size="11" fill="#71717A">华北 98.0w</text>
+            <text x="220" y="185" text-anchor="middle" font-size="11" fill="#71717A">华北开拓</text>
+
+            <circle cx="360" cy="125" r="4" fill="#FFFFFF" stroke="#4F46E5" stroke-width="2" />
+            <text x="360" y="113" text-anchor="middle" font-size="11" fill="#71717A">华南 81.2w</text>
+            <text x="360" y="185" text-anchor="middle" font-size="11" fill="#71717A">华南大客户</text>
+
+            <circle cx="520" cy="155" r="4" fill="#FFFFFF" stroke="#4F46E5" stroke-width="2" />
+            <text x="520" y="143" text-anchor="middle" font-size="11" fill="#71717A">西南 41.6w</text>
+            <text x="520" y="185" text-anchor="middle" font-size="11" fill="#71717A">西南新兴</text>
+
+            <circle cx="600" cy="165" r="4" fill="#FFFFFF" stroke="#4F46E5" stroke-width="2" />
+            <text x="600" y="185" text-anchor="middle" font-size="11" fill="#71717A">出海 21.4w</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- 紧凑清爽的数据附表 (不是傻大黑粗的表格，是精致浅色对齐表格) -->
+      <div class="space-y-3 pt-2">
+        <div class="flex items-center justify-between text-xs">
+          <span class="font-semibold text-zinc-800">明细数据透视 (前 5 行)</span>
+          <span class="text-zinc-600">已自动过滤异常离群值</span>
+        </div>
+        <div class="overflow-x-auto rounded-xl border border-zinc-200">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-zinc-50 border-b border-zinc-200 text-zinc-500 font-medium">
+              <tr>
+                <th class="py-2.5 px-4">团队 / 维度</th>
+                <th class="py-2.5 px-4 text-right">成交规模 (¥)</th>
+                <th class="py-2.5 px-4 text-right">成单笔数</th>
+                <th class="py-2.5 px-4 text-right">环比异动</th>
+                <th class="py-2.5 px-4 text-center">状态判定</th>
+              </tr>
+            </thead>
+            <tbody id="notion-table-body" class="divide-y divide-zinc-100 font-mono tabular-nums text-zinc-800">
+              <tr class="hover:bg-zinc-50/80 transition-colors">
+                <td class="py-2.5 px-4 font-sans font-medium text-zinc-900">华东战略战队</td>
+                <td class="py-2.5 px-4 text-right font-semibold">1,420,500.00</td>
+                <td class="py-2.5 px-4 text-right">1,280</td>
+                <td class="py-2.5 px-4 text-right text-emerald-800 font-medium">+18.4%</td>
+                <td class="py-2.5 px-4 text-center"><span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-sans">超预期</span></td>
+              </tr>
+              <tr class="hover:bg-zinc-50/80 transition-colors">
+                <td class="py-2.5 px-4 font-sans font-medium text-zinc-900">华北大区开拓组</td>
+                <td class="py-2.5 px-4 text-right">980,200.00</td>
+                <td class="py-2.5 px-4 text-right">940</td>
+                <td class="py-2.5 px-4 text-right text-emerald-800">+9.5%</td>
+                <td class="py-2.5 px-4 text-center"><span class="px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600 text-[11px] font-sans">正常</span></td>
+              </tr>
+              <tr class="hover:bg-zinc-50/80 transition-colors">
+                <td class="py-2.5 px-4 font-sans font-medium text-zinc-900">华南大客户组</td>
+                <td class="py-2.5 px-4 text-right">812,000.00</td>
+                <td class="py-2.5 px-4 text-right">760</td>
+                <td class="py-2.5 px-4 text-right text-rose-800">-3.2%</td>
+                <td class="py-2.5 px-4 text-center"><span class="px-2 py-0.5 rounded-full bg-rose-50 text-rose-800 text-[11px] font-sans">交付预警</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </article>
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- 方案 B：【Linear / Raycast 瑞士极客工站 (The Swiss Minimal)】   -->
+  <!-- 特点：极度克制、冷白浅灰、纯粹无彩色中性色、键盘友好           -->
+  <!-- ============================================================== -->
+  <main id="design-linear" class="hidden flex-1 flex bg-[#F8FAFC] text-slate-800">
+    
+    <!-- 左侧极窄工具栏 (Linear 风格 56px 侧栏) -->
+    <aside class="w-14 bg-white border-r border-slate-200 flex flex-col items-center py-4 justify-between shrink-0">
+      <div class="space-y-4 flex flex-col items-center">
+        <div class="w-8 h-8 rounded-lg bg-indigo-600 text-white font-bold text-xs flex items-center justify-center shadow-xs">
+          DP
+        </div>
+        <button class="w-8 h-8 rounded-lg bg-slate-100 text-slate-900 flex items-center justify-center text-sm font-semibold">
+          ⚡
+        </button>
+        <button class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-500 flex items-center justify-center text-sm">
+          📊
+        </button>
+        <button class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-500 flex items-center justify-center text-sm">
+          📁
+        </button>
+      </div>
+      <div class="w-8 h-8 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-xs font-bold">
+        L
+      </div>
+    </aside>
+
+    <!-- 主工站区域 -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+      <!-- 极简工站顶部 Bar -->
+      <div class="h-12 bg-white border-b border-slate-200 px-6 flex items-center justify-between text-xs">
+        <div class="flex items-center gap-3">
+          <span class="font-semibold text-slate-900">Workspace / 销售业绩归因</span>
+          <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-mono text-[11px]">sqlite: mode=ro</span>
+        </div>
+        <div class="flex items-center gap-3 text-slate-600 font-mono text-[11px]">
+          <span>⌘K 快捷提问</span>
+          <button onclick="alert('⚡ 触发 Linear 式一键刷新')" class="px-2.5 py-1 rounded bg-slate-900 hover:bg-slate-800 text-white font-sans text-xs">
+            运行查询 (⌘+Enter)
+          </button>
+        </div>
+      </div>
+
+      <!-- 工站内容区 (高密度、极度清晰) -->
+      <div class="p-6 max-w-6xl w-full mx-auto space-y-6">
+        
+        <!-- 跑分卡 (Linear 极简微阴影卡片) -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs">
+            <div class="text-[11px] font-medium text-slate-600 uppercase tracking-wider">总成交额 (GMV)</div>
+            <div class="text-xl font-bold font-mono text-slate-900 mt-1 tabular-nums">¥3,842,500</div>
+            <div class="text-xs text-emerald-800 font-medium mt-1">↑ +14.8% vs last period</div>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs">
+            <div class="text-[11px] font-medium text-slate-600 uppercase tracking-wider">有效单量</div>
+            <div class="text-xl font-bold font-mono text-slate-900 mt-1 tabular-nums">4,218</div>
+            <div class="text-xs text-slate-600 mt-1">转化率稳定</div>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs">
+            <div class="text-[11px] font-medium text-slate-600 uppercase tracking-wider">平均客单价</div>
+            <div class="text-xl font-bold font-mono text-slate-900 mt-1 tabular-nums">¥910.98</div>
+            <div class="text-xs text-slate-600 mt-1">+6.1% 结构升级</div>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs">
+            <div class="text-[11px] font-medium text-slate-600 uppercase tracking-wider">执行沙箱耗时</div>
+            <div class="text-xl font-bold font-mono text-indigo-600 mt-1 tabular-nums">18.4 ms</div>
+            <div class="text-xs text-emerald-800 font-medium mt-1">AST 只读验证通过</div>
+          </div>
+        </div>
+
+        <!-- 极简工站图表卡片 -->
+        <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-2xs space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div>
+              <h3 class="text-sm font-semibold text-slate-900">销售趋势柱状图与同比标尺</h3>
+              <p class="text-xs text-slate-600">基于 sqlglot 注入 LIMIT 500 的安全聚合结果</p>
+            </div>
+            <div class="flex items-center gap-1.5 bg-slate-100 p-0.5 rounded-lg text-xs font-medium text-slate-600">
+              <span class="px-2 py-0.5 bg-white rounded shadow-xs text-slate-900">柱状对比</span>
+              <span class="px-2 py-0.5">折线走势</span>
+            </div>
+          </div>
+
+          <!-- 极简清新细柱图 (无多余杂色，纯粹靛蓝单色) -->
+          <div class="h-56 w-full flex items-end justify-between px-8 pb-4 pt-6 bg-slate-50/50 rounded-lg border border-slate-100">
+            <div class="flex flex-col items-center gap-2 group cursor-pointer">
+              <span class="text-[11px] font-mono text-slate-600 group-hover:text-indigo-600 transition-colors">¥142.0w</span>
+              <div class="w-12 h-36 bg-indigo-600 rounded-t-md group-hover:bg-indigo-500 transition-colors"></div>
+              <span class="text-xs font-medium text-slate-700">华东战队</span>
+            </div>
+            <div class="flex flex-col items-center gap-2 group cursor-pointer">
+              <span class="text-[11px] font-mono text-slate-600 group-hover:text-indigo-600 transition-colors">¥98.0w</span>
+              <div class="w-12 h-24 bg-slate-300 rounded-t-md group-hover:bg-slate-400 transition-colors"></div>
+              <span class="text-xs font-medium text-slate-700">华北开拓</span>
+            </div>
+            <div class="flex flex-col items-center gap-2 group cursor-pointer">
+              <span class="text-[11px] font-mono text-slate-600 group-hover:text-indigo-600 transition-colors">¥81.2w</span>
+              <div class="w-12 h-20 bg-slate-300 rounded-t-md group-hover:bg-slate-400 transition-colors"></div>
+              <span class="text-xs font-medium text-slate-700">华南大客户</span>
+            </div>
+            <div class="flex flex-col items-center gap-2 group cursor-pointer">
+              <span class="text-[11px] font-mono text-slate-600 group-hover:text-indigo-600 transition-colors">¥41.6w</span>
+              <div class="w-12 h-12 bg-slate-300 rounded-t-md group-hover:bg-slate-400 transition-colors"></div>
+              <span class="text-xs font-medium text-slate-700">西南新兴</span>
+            </div>
+            <div class="flex flex-col items-center gap-2 group cursor-pointer">
+              <span class="text-[11px] font-mono text-slate-600 group-hover:text-indigo-600 transition-colors">¥21.4w</span>
+              <div class="w-12 h-6 bg-slate-300 rounded-t-md group-hover:bg-slate-400 transition-colors"></div>
+              <span class="text-xs font-medium text-slate-700">出海跨境</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- 方案 C：【Apple Pro / Perplexity 深空呼吸流 (The Studio Dark)】 -->
+  <!-- 特点：绝非死黑！带有极光微晕、悬浮毛玻璃、0.5px 微光高光       -->
+  <!-- ============================================================== -->
+  <main id="design-studio" class="hidden flex-1 bg-[#090D16] text-slate-100 flex flex-col relative overflow-hidden">
+    
+    <!-- 顶部径向柔光背景 (Radial Aurora Glow) -->
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[350px] bg-gradient-to-b from-sky-500/15 via-indigo-500/5 to-transparent blur-3xl pointer-events-none rounded-full"></div>
+
+    <div class="relative z-10 max-w-5xl w-full mx-auto px-6 py-10 space-y-8">
+      
+      <!-- 居中标题与呼吸气泡 -->
+      <div class="text-center space-y-2">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/60 border border-slate-700/60 text-xs text-sky-400 backdrop-blur-md">
+          <span class="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span>
+          Studio Pro Analytics Environment
+        </div>
+        <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-200 to-slate-400">
+          全息数据脉搏 · 智能洞察工作舱
+        </h2>
+        <p class="text-xs text-slate-400 max-w-md mx-auto">
+          深空高对比度视觉，极度克制的光影层级，为高强度夜间分析设计。
+        </p>
+      </div>
+
+      <!-- 悬浮毛玻璃卡片 (真正的 Backdrop Blur + 0.5px 微光) -->
+      <div class="bg-slate-900/40 backdrop-blur-2xl border border-white/10 rounded-3xl p-7 shadow-2xl shadow-sky-950/30 space-y-6">
+        
+        <!-- 3 个发光核心数据 -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-4">
+            <span class="text-xs text-slate-400 font-medium">成交金额 GMV</span>
+            <div class="text-2xl font-bold font-mono text-white mt-1 tabular-nums">¥ 3,842,500</div>
+            <div class="text-xs text-sky-400 mt-1 font-medium">↑ +14.8% 创季度新高</div>
+          </div>
+          <div class="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-4">
+            <span class="text-xs text-slate-400 font-medium">完成订单量</span>
+            <div class="text-2xl font-bold font-mono text-white mt-1 tabular-nums">4,218 笔</div>
+            <div class="text-xs text-emerald-400 mt-1 font-medium">99.4% 履约交付率</div>
+          </div>
+          <div class="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-4">
+            <span class="text-xs text-slate-400 font-medium">沙箱执行防线</span>
+            <div class="text-2xl font-bold font-mono text-emerald-400 mt-1">100% SECURE</div>
+            <div class="text-xs text-slate-400 mt-1">AST 严格只读隔离</div>
+          </div>
+        </div>
+
+        <!-- 霓虹微发光面积图 -->
+        <div class="bg-black/30 border border-white/[0.05] rounded-2xl p-5 h-64 flex flex-col justify-between">
+          <div class="flex items-center justify-between text-xs text-slate-400">
+            <span>战队成长轨迹 (天蓝科技微光通道)</span>
+            <span class="font-mono text-sky-400 text-[11px]">60FPS ACCELERATED</span>
+          </div>
+
+          <!-- 发光 SVG 折线 -->
+          <svg class="w-full h-44" viewBox="0 0 600 150">
+            <defs>
+              <linearGradient id="studio-glow" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.35"/>
+                <stop offset="100%" stop-color="#38BDF8" stop-opacity="0.0"/>
+              </linearGradient>
+            </defs>
+            <path d="M 50 130 C 100 40, 180 60, 220 70 C 280 80, 340 100, 400 105 C 460 110, 520 120, 560 125 L 560 140 L 50 140 Z" fill="url(#studio-glow)" />
+            <path d="M 50 40 C 100 40, 180 60, 220 70 C 280 80, 340 100, 400 105 C 460 110, 520 120, 560 125" fill="none" stroke="#38BDF8" stroke-width="3" stroke-linecap="round" />
+            <circle cx="50" cy="40" r="5" fill="#090D16" stroke="#38BDF8" stroke-width="3" />
+            <circle cx="220" cy="70" r="4" fill="#090D16" stroke="#38BDF8" stroke-width="2" />
+            <circle cx="400" cy="105" r="4" fill="#090D16" stroke="#38BDF8" stroke-width="2" />
+          </svg>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- 模态弹窗：审查 SQL 逻辑 (优雅轻量抽屉)                         -->
+  <!-- ============================================================== -->
+  <div id="modal-sql" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
+    <div class="bg-white rounded-2xl border border-zinc-200 max-w-lg w-full p-6 shadow-xl space-y-4 text-xs">
+      <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
+        <h4 class="text-sm font-semibold text-zinc-900 flex items-center gap-2">
+          <span>🔍</span> 经过 AST 只读沙箱审定的 SQL 语句
+        </h4>
+        <button onclick="closeSqlModal()" class="text-zinc-400 hover:text-zinc-600 text-lg leading-none">&times;</button>
+      </div>
+      <pre class="bg-zinc-900 text-zinc-100 p-4 rounded-xl font-mono text-[11px] leading-relaxed overflow-x-auto">SELECT 
+  t.team_name,
+  SUM(s.amount) AS total_gmv,
+  ROUND((SUM(s.amount) - LAG(SUM(s.amount)) OVER (PARTITION BY t.team_name ORDER BY s.month)) 
+        / LAG(SUM(s.amount)) OVER (PARTITION BY t.team_name ORDER BY s.month) * 100, 2) AS mom_growth
+FROM sales_records s
+JOIN teams t ON s.team_id = t.id
+WHERE s.order_date >= date('now', '-6 month')
+GROUP BY t.team_name
+ORDER BY total_gmv DESC
+LIMIT 500; -- [AST 沙箱自动注入截断]</pre>
+      <div class="flex items-center justify-between text-zinc-500 text-[11px]">
+        <span>✓ 校验通过: 纯只读 SELECT · 无写风险</span>
+        <button onclick="closeSqlModal()" class="px-3 py-1.5 rounded-lg bg-zinc-900 text-white font-medium">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- 控制器脚本                                                     -->
+  <!-- ============================================================== -->
+  <script>
+    function selectDesign(type) {
+      const notion = document.getElementById('design-notion');
+      const linear = document.getElementById('design-linear');
+      const studio = document.getElementById('design-studio');
+      const tabNotion = document.getElementById('btn-tab-notion');
+      const tabLinear = document.getElementById('btn-tab-linear');
+      const tabStudio = document.getElementById('btn-tab-studio');
+
+      // 隐藏所有
+      notion.classList.add('hidden');
+      linear.classList.add('hidden');
+      studio.classList.add('hidden');
+
+      // 重置 Tab 样式
+      [tabNotion, tabLinear, tabStudio].forEach(t => {
+        t.className = "px-3.5 py-1.5 rounded-lg text-xs font-medium text-zinc-500 hover:text-zinc-900 transition-all flex items-center gap-1.5";
+      });
+
+      if (type === 'notion') {
+        notion.classList.remove('hidden');
+        tabNotion.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all bg-white text-zinc-900 shadow-sm flex items-center gap-1.5";
+        document.body.className = "bg-[#FBFBFA] text-[#18181B] min-h-screen flex flex-col";
+      } else if (type === 'linear') {
+        linear.classList.remove('hidden');
+        tabLinear.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all bg-white text-slate-900 shadow-sm flex items-center gap-1.5";
+        document.body.className = "bg-[#F8FAFC] text-slate-800 min-h-screen flex flex-col";
+      } else if (type === 'studio') {
+        studio.classList.remove('hidden');
+        tabStudio.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all bg-slate-900 text-white shadow-sm flex items-center gap-1.5";
+        document.body.className = "bg-[#090D16] text-slate-100 min-h-screen flex flex-col";
+      }
+    }
+
+    function openSqlModal() {
+      document.getElementById('modal-sql').classList.remove('hidden');
+    }
+    function closeSqlModal() {
+      document.getElementById('modal-sql').classList.add('hidden');
+    }
+
+    // 模拟数据切换
+    function setQueryA(idx) {
+      const titles = [
+        "",
+        "2026 半年度各战队销售业绩与成单环比深度归因",
+        "核心商品品类客单价与毛利结构相关性透视",
+        "近 30 天高净值活跃用户流失风险与地域分布预警"
+      ];
+      const gmv = ["", "¥ 3,842,500", "¥ 2,150,000", "¥ 890,400"];
+      const orders = ["", "4,218 笔", "1,850 笔", "620 笔"];
+      const aov = ["", "¥ 910.98", "¥ 1,162.16", "¥ 1,436.12"];
+      
+      document.getElementById('notion-title').innerText = titles[idx];
+      document.getElementById('notion-kpi-1').innerText = gmv[idx];
+      document.getElementById('notion-kpi-2').innerText = orders[idx];
+      document.getElementById('notion-kpi-3').innerText = aov[idx];
+
+      // 闪烁视觉反馈
+      const card = document.querySelector('article');
+      card.style.opacity = '0.5';
+      setTimeout(() => { card.style.opacity = '1'; }, 200);
+    }
+
+    function simulateRunA() {
+      setQueryA(2);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+# 环境变量与密钥凭据 (严格禁止入库)
+.env
+.env.*
+!.env.example
+
+# Python 虚拟环境与缓存
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Node & 前端构建
+node_modules/
+dist/
+.DS_Store
+
+# 数据与归档落盘文件
+backend/data/*.sqlite
+backend/data/*.db
+backend/reports/
+reports/
+logs/
+*.log
