@@ -71,15 +71,19 @@ export const ReportPreviewModal: React.FC<ReportPreviewModalProps> = ({
 
   // 全要素结构化 Markdown 渲染引擎 (包含内嵌矢量 SVG 图表、高管指标卡、SQL 终端与明细表格)
   const renderStructuredMarkdown = (content: string) => {
-    const lines = content.split('\n');
+    // 1. 预提取所有 <svg ... </svg> 矢量图表，用唯一 token 占位，彻底免疫 Markdown 换行/空行/缩进切片
+    const svgBlocks: string[] = [];
+    const preprocessed = content.replace(/<svg[\s\S]*?<\/svg>/gi, (match) => {
+      const idx = svgBlocks.length;
+      svgBlocks.push(match);
+      return `\n\n@@DATAPULSE_SVG_BLOCK_${idx}@@\n\n`;
+    });
+
+    const lines = preprocessed.split('\n');
     const elements: React.ReactNode[] = [];
     
     let inCodeBlock = false;
     let codeLines: string[] = [];
-    
-    let inSvgBlock = false;
-    let svgLines: string[] = [];
-    
     let tableRows: string[] = [];
     let kpiItems: { label: string; value: string }[] = [];
 
@@ -155,36 +159,21 @@ export const ReportPreviewModal: React.FC<ReportPreviewModalProps> = ({
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
 
-      // 1. 处理内嵌 SVG 矢量图表
-      if (line.includes('<svg')) {
-        inSvgBlock = true;
-        svgLines.push(line);
-        if (line.includes('</svg>')) {
-          inSvgBlock = false;
+      // 1. 处理内嵌 SVG 矢量图表占位符
+      const svgMatch = line.match(/@@DATAPULSE_SVG_BLOCK_(\d+)@@/);
+      if (svgMatch) {
+        if (kpiItems.length > 0) elements.push(flushKpis(i * 10 + 1));
+        if (tableRows.length > 0) elements.push(flushTable(i * 10 + 2));
+        const blockIdx = parseInt(svgMatch[1], 10);
+        const rawSvg = svgBlocks[blockIdx];
+        if (rawSvg) {
           elements.push(
             <div 
-              key={`svg-${i}`} 
+              key={`svg-block-${blockIdx}`} 
               className="my-5 overflow-hidden rounded-2xl border border-neutral-200/90 bg-white p-2 shadow-xs"
-              dangerouslySetInnerHTML={{ __html: svgLines.join('\n') }} 
+              dangerouslySetInnerHTML={{ __html: rawSvg }} 
             />
           );
-          svgLines = [];
-        }
-        continue;
-      }
-
-      if (inSvgBlock) {
-        svgLines.push(line);
-        if (line.includes('</svg>')) {
-          inSvgBlock = false;
-          elements.push(
-            <div 
-              key={`svg-${i}`} 
-              className="my-5 overflow-hidden rounded-2xl border border-neutral-200/90 bg-white p-2 shadow-xs"
-              dangerouslySetInnerHTML={{ __html: svgLines.join('\n') }} 
-            />
-          );
-          svgLines = [];
         }
         continue;
       }

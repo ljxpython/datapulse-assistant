@@ -99,49 +99,57 @@ def generate_chart_svg(
             return f"{v/1000:.1f}k"
         return f"{v:,.0f}"
 
-    # 坐标轴网格线
+    # 坐标轴网格线 (紧凑单行格式，严禁出现空行与 4+ 空格缩进，确保 CommonMark HTML 块解析无损)
     grid_lines = []
     for g_idx in range(4):
         gy = padding_top + (inner_h / 3) * g_idx
         g_val = max_val - (max_val - min_val) * (g_idx / 3)
-        grid_lines.append(f"""
-        <line x1="{padding_left}" y1="{gy:.1f}" x2="{width - padding_right}" y2="{gy:.1f}" stroke="#F0F0EE" stroke-width="1" stroke-dasharray="3,3" />
-        <text x="{padding_left - 10}" y="{gy + 4:.1f}" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="10" fill="#999994" text-anchor="end">{fmt_num(g_val)}</text>
-        """)
+        grid_lines.append(
+            f'<line x1="{padding_left}" y1="{gy:.1f}" x2="{width - padding_right}" y2="{gy:.1f}" stroke="#F0F0EE" stroke-width="1" stroke-dasharray="3,3" />'
+        )
+        grid_lines.append(
+            f'<text x="{padding_left - 10}" y="{gy + 4:.1f}" font-family="-apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif" font-size="10" fill="#999994" text-anchor="end">{fmt_num(g_val)}</text>'
+        )
 
     # 数据点圆圈与 X 轴标签
-    nodes = []
+    node_lines = []
     for p in points:
-        nodes.append(f"""
-        <circle cx="{p['x']:.1f}" cy="{p['y']:.1f}" r="4" fill="#FFFFFF" stroke="#2563EB" stroke-width="2.5" />
-        <text x="{p['x']:.1f}" y="{p['y'] - 8:.1f}" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="9" font-weight="600" fill="#1D4ED8" text-anchor="middle">{fmt_num(p['val'])}</text>
-        <text x="{p['x']:.1f}" y="{baseline_y + 16:.1f}" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="10" fill="#787873" text-anchor="middle">{html.escape(p['label'])}</text>
-        """)
+        px = p["x"]
+        py = p["y"]
+        pval = p["val"]
+        plabel = p["label"]
+        node_lines.append(
+            f'<circle cx="{px:.1f}" cy="{py:.1f}" r="4" fill="#FFFFFF" stroke="#2563EB" stroke-width="2.5" />'
+        )
+        node_lines.append(
+            f'<text x="{px:.1f}" y="{py - 8:.1f}" font-family="-apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif" font-size="9" font-weight="600" fill="#1D4ED8" text-anchor="middle">{fmt_num(pval)}</text>'
+        )
+        node_lines.append(
+            f'<text x="{px:.1f}" y="{baseline_y + 16:.1f}" font-family="-apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif" font-size="10" fill="#787873" text-anchor="middle">{html.escape(plabel)}</text>'
+        )
 
-    svg_content = f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="100%" height="auto" style="background:#FFFFFF;border-radius:14px;border:1px solid #EAEAE7;margin:16px 0;box-shadow:0 1px 3px rgba(0,0,0,0.02);">
-  <defs>
-    <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#3B82F6" stop-opacity="0.28" />
-      <stop offset="100%" stop-color="#3B82F6" stop-opacity="0.0" />
-    </linearGradient>
-  </defs>
+    # 组装纯净无空行、无 4+ 空格缩进的合规 SVG (严格遵循 CommonMark HTML 块标准)
+    svg_parts = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="100%" height="auto" style="background:#FFFFFF;border-radius:14px;border:1px solid #EAEAE7;margin:16px 0;box-shadow:0 1px 3px rgba(0,0,0,0.02);">',
+        '  <defs>',
+        '  <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">',
+        '  <stop offset="0%" stop-color="#3B82F6" stop-opacity="0.28" />',
+        '  <stop offset="100%" stop-color="#3B82F6" stop-opacity="0.0" />',
+        '  </linearGradient>',
+        '  </defs>',
+        f'  <text x="{padding_left}" y="22" font-family="-apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif" font-size="12" font-weight="700" fill="#171717">趋势走势与业务量化对比 · 指标: {y_col_name}</text>',
+        f'  <text x="{width - padding_right}" y="22" font-family="-apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif" font-size="10" fill="#999994" text-anchor="end">X 轴基准: {x_col_name}</text>',
+    ]
+    # 网格线
+    svg_parts.extend(f'  {gl}' for gl in grid_lines)
+    # X 轴底线
+    svg_parts.append(f'  <line x1="{padding_left}" y1="{baseline_y}" x2="{width - padding_right}" y2="{baseline_y}" stroke="#E5E5E3" stroke-width="1.5" />')
+    # 面积与曲线
+    svg_parts.append(f'  <path d="{area_d}" fill="url(#areaGradient)" />')
+    svg_parts.append(f'  <path d="{path_d}" fill="none" stroke="#2563EB" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />')
+    # 节点
+    svg_parts.extend(f'  {nl}' for nl in node_lines)
+    # 闭合
+    svg_parts.append('</svg>')
 
-  <!-- 图表标题与图例 -->
-  <text x="{padding_left}" y="22" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="12" font-weight="700" fill="#171717">趋势走势与业务量化对比 · 指标: {y_col_name}</text>
-  <text x="{width - padding_right}" y="22" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="10" fill="#999994" text-anchor="end">X 轴基准: {x_col_name}</text>
-
-  <!-- 网格刻度线 -->
-  {''.join(grid_lines)}
-
-  <!-- X 轴底线 -->
-  <line x1="{padding_left}" y1="{baseline_y}" x2="{width - padding_right}" y2="{baseline_y}" stroke="#E5E5E3" stroke-width="1.5" />
-
-  <!-- 面积阴影与贝塞尔主折线 -->
-  <path d="{area_d}" fill="url(#areaGradient)" />
-  <path d="{path_d}" fill="none" stroke="#2563EB" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
-
-  <!-- 数据点与标签 -->
-  {''.join(nodes)}
-</svg>"""
-
-    return svg_content
+    return '\n'.join(svg_parts)
